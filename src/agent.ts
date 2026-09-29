@@ -48,6 +48,48 @@ export class CaffAgent extends Agent<Env, ChatState> {
   }
 
   async chat(message: string, origin: string): Promise<ChatReply> {
+    // TODO 1: connect to your own MCP server, the same way AI Playground did.
+    // Uncomment this. The headers tell the dashboard the calls come from your agent.
+    await this.addMcpServer("caff", `${origin}/mcp`, {
+      transport: {
+        type: "streamable-http",
+        headers: { "x-caff-client": "agent", "x-caff-origin": origin }
+      }
+    });
+
+    // Ask the model. It sees the conversation so far and, once you've done
+    // TODO 2, every tool your MCP server offers. The SDK runs the tools the
+    // model picks and feeds the results back until it has an answer.
+    const result = await generateText({
+      model: chatModel(this.env),
+      system: SYSTEM_PROMPT,
+      messages: toModelMessages(this.state.messages, message),
+      // TODO 2: give the model your MCP tools.
+      tools: this.mcp.getAITools(),
+      stopWhen: isStepCount(8)
+    });
+
+    // Remember the conversation. setState saves it in this agent's storage.
+    const tools = traceTools(this, result.steps);
+    this.setState(rememberTurn(this.state, message, result.text, tools));
+
+    return { reply: result.text, tools };
+  }
+}
+ * Stuck? Run `npm run skip:agent` (your file is backed up to src/agent.ts.bak first).
+ *
+ * Each chat session gets its own CaffAgent instance. It's a Durable Object,
+ * so it keeps its state (the conversation) between messages.
+ */
+export class CaffAgent extends Agent<Env, ChatState> {
+  initialState: ChatState = { messages: [] };
+
+  // The chat UI at /chat talks to this agent over HTTP.
+  async onRequest(request: Request) {
+    return handleChatRequest(this, request);
+  }
+
+  async chat(message: string, origin: string): Promise<ChatReply> {
    // TODO 1: connect to your own MCP server
    await this.addMcpServer("caff", `${origin}/mcp`, {
      transport: {
