@@ -84,8 +84,8 @@ export function createCaffMcpServer(caff: Caff) {
      }
   );
 
-   TODO 2: list_orders
-   Read-only, like get_menu. Both inputs are optional.
+//   TODO 2: list_orders
+//   Read-only, like get_menu. Both inputs are optional.
   
    server.registerTool(
      "list_orders",
