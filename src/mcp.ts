@@ -87,10 +87,10 @@ export function createCaffMcpServer(caff: Caff) {
 //   TODO 2: list_orders
 //   Read-only, like get_menu. Both inputs are optional.
   
-   server.registerTool(
-     "list_orders",
-     {
-       title: "List orders",
+  server.registerTool(
+    "list_orders",
+    {
+      title: "List orders",
        description:
          "List orders, newest first. 'active' (the default) means anything not yet served or cancelled. Optionally filter by table.",
        inputSchema: z.object({
@@ -103,7 +103,6 @@ export function createCaffMcpServer(caff: Caff) {
        annotations: { readOnlyHint: true }
      },
      async ({ status, table }) => asText(await caff.listOrders({ status, table }))
-       // your code here
      }
    );
 
