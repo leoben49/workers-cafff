@@ -84,28 +84,28 @@ export function createCaffMcpServer(caff: Caff) {
      }
   );
 
-  // TODO 2: list_orders
-  // Read-only, like get_menu. Both inputs are optional.
-  //
-  // server.registerTool(
-  //   "list_orders",
-  //   {
-  //     title: "List orders",
-  //     description:
-  //       "List orders, newest first. 'active' (the default) means anything not yet served or cancelled. Optionally filter by table.",
-  //     inputSchema: z.object({
-  //       status: z
-  //         .enum(["active", "new", "cooking", "ready", "served", "cancelled", "all"])
-  //         .default("active")
-  //         .describe("Which orders to show"),
-  //       table: z.number().int().min(1).max(12).optional().describe("Only this table")
-  //     }),
-  //     annotations: { readOnlyHint: true }
-  //   },
-  //   async ({ status, table }) => {
-  //     // your code here
-  //   }
-  // );
+   TODO 2: list_orders
+   Read-only, like get_menu. Both inputs are optional.
+  
+   server.registerTool(
+     "list_orders",
+     {
+       title: "List orders",
+       description:
+         "List orders, newest first. 'active' (the default) means anything not yet served or cancelled. Optionally filter by table.",
+       inputSchema: z.object({
+         status: z
+           .enum(["active", "new", "cooking", "ready", "served", "cancelled", "all"])
+           .default("active")
+           .describe("Which orders to show"),
+         table: z.number().int().min(1).max(12).optional().describe("Only this table")
+       }),
+       annotations: { readOnlyHint: true }
+     },
+     async ({ status, table }) => asText(await caff.listOrders({ status, table }))
+       // your code here
+     }
+   );
 
   // TODO 3: update_order_status
   // Orders move new → cooking → ready → served (or cancelled).
