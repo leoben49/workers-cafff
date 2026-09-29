@@ -128,8 +128,19 @@ export function createCaffMcpServer(caff: Caff) {
 
   // TODO 4: restock_item
   // This one's all yours: write the description and the inputSchema too.
-  // Inputs: itemId (a string) and quantity (a whole number, 1 to 50).
-  // Then call caff.restockItem(itemId, quantity).
+   server.registerTool(
+  "restock_item",
+  {
+    title: "Restock an item",
+    description:
+      "Add portions back to a menu item's stock, for example after a delivery. Use item ids from get_menu.",
+    inputSchema: z.object({
+      itemId: z.string().describe("Menu item id from get_menu"),
+      quantity: z.number().int().min(1).max(50).describe("How many portions to add")
+    })
+  },
+  async ({ itemId, quantity }) => asText(await caff.restockItem(itemId, quantity))
+);
 
   return server;
 }
