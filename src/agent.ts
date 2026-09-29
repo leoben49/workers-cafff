@@ -48,27 +48,31 @@ export class CaffAgent extends Agent<Env, ChatState> {
   }
 
   async chat(message: string, origin: string): Promise<ChatReply> {
-    // TODO 1: connect to your own MCP server, the same way AI Playground did.
-    // Uncomment this. The headers tell the dashboard the calls come from your agent.
-    //
-     await this.addMcpServer("caff", `${origin}/mcp`, {
-       transport: {
-         type: "streamable-http",
-         headers: { "x-caff-client": "agent", "x-caff-origin": origin }
-       }
-     });
+   // TODO 1: connect to your own MCP server
+   await this.addMcpServer("caff", `${origin}/mcp`, {
+     transport: {
+       type: "streamable-http",
+       headers: { "x-caff-client": "agent", "x-caff-origin": origin }
+     }
+   });
 
-    // Ask the model. It sees the conversation so far and, once you've done
-    // TODO 2, every tool your MCP server offers. The SDK runs the tools the
-    // model picks and feeds the results back until it has an answer.
-    const result = await generateText({
-      model: chatModel(this.env),
-      system: SYSTEM_PROMPT,
-      messages: toModelMessages(this.state.messages, message),
-      // TODO 2: give the model your MCP tools. Uncomment the next line.
-       tools: this.mcp.getAITools(),
-      stopWhen: isStepCount(8)
-    });
+   // Ask the model with MCP tools passed in
+   const result = await generateText({
+     model: chatModel(this.env),
+     system: SYSTEM_PROMPT,
+     messages: toModelMessages(this.state.messages, message),
+     // TODO 2: Add `await` here so the model receives the tools
+     tools: await this.mcp.getAITools(),
+     stopWhen: isStepCount(8)
+   });
+
+   // Remember the conversation
+   const tools = traceTools(this, result.steps);
+   this.setState(rememberTurn(this.state, message, result.text, tools));
+
+   return { reply: result.text, tools };
+ }
+
 
     // Remember the conversation. setState saves it in this agent's storage.
     const tools = traceTools(this, result.steps);
