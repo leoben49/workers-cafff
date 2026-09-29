@@ -102,28 +102,29 @@ export function createCaffMcpServer(caff: Caff) {
        }),
        annotations: { readOnlyHint: true }
      },
-     async ({ status, table }) => asText(await caff.listOrders({ status, table }))
+     async ({ status, table }) => {
+       asText(await caff.listOrders({ status, table }))
      }
    );
 
   // TODO 3: update_order_status
   // Orders move new → cooking → ready → served (or cancelled).
   //
-  // server.registerTool(
-  //   "update_order_status",
-  //   {
-  //     title: "Update an order's status",
-  //     description:
-  //       "Move an order through the kitchen: new → cooking → ready → served. Orders only move forward. 'cancelled' cancels it and returns the stock.",
-  //     inputSchema: z.object({
-  //       orderId: z.number().int().describe("The order number, e.g. 101"),
-  //       status: z.enum(["cooking", "ready", "served", "cancelled"]).describe("The new status")
-  //     })
-  //   },
-  //   async ({ orderId, status }) => {
-  //     // your code here
-  //   }
-  // );
+   server.registerTool(
+     "update_order_status",
+     {
+       title: "Update an order's status",
+       description:
+         "Move an order through the kitchen: new → cooking → ready → served. Orders only move forward. 'cancelled' cancels it and returns the stock.",
+       inputSchema: z.object({
+         orderId: z.number().int().describe("The order number, e.g. 101"),
+         status: z.enum(["cooking", "ready", "served", "cancelled"]).describe("The new status")
+       })
+     },
+     async ({ orderId, status }) => {
+       asText(await caff.updateOrderStatus(orderId, status))
+     }
+   );
 
   // TODO 4: restock_item
   // This one's all yours: write the description and the inputSchema too.
