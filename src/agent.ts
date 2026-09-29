@@ -72,12 +72,4 @@ export class CaffAgent extends Agent<Env, ChatState> {
 
    return { reply: result.text, tools };
  }
-
-
-    // Remember the conversation. setState saves it in this agent's storage.
-    const tools = traceTools(this, result.steps);
-    this.setState(rememberTurn(this.state, message, result.text, tools));
-
-    return { reply: result.text, tools };
-  }
 }
